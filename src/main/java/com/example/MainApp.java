@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.Stack;
 import java.awt.Image;
 import javax.imageio.ImageIO;
 
@@ -16,6 +17,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import cz.vutbr.web.css.CSSException;
+import cz.vutbr.web.css.CSSFactory;
+import cz.vutbr.web.css.StyleSheet;
+import cz.vutbr.web.domassign.StyleMap;
 
 public class MainApp {
     private int[] sizes = { 1920, 1600, 1366, 1024, 768, 640 };
@@ -108,7 +114,8 @@ public class MainApp {
      * size in the {@code sizes[]}-Array multiplied by {@code dimension/100}.
      * <p>
      * It saves them using the
-     * {@link #saveImages(BufferedImage[], File, String)}-method and returns their names.
+     * {@link #saveImages(BufferedImage[], File, String)}-method and returns their
+     * names.
      * 
      * @param filePath  - file path to the picture as string
      * @param dimension - in vw, size of the picture on the page
@@ -124,7 +131,8 @@ public class MainApp {
     }
 
     /**
-     * Creates all the pictures for an given file describing an picture and then saves them
+     * Creates all the pictures for an given file describing an picture and then
+     * saves them
      * in the same subfolder.
      * <p>
      * It creates the picures by resizing them with
@@ -150,7 +158,7 @@ public class MainApp {
         try {
             original = ImageIO.read(originalFile);
             for (int i = 0; i < sizes.length; i++) {
-                if (original.getWidth() >= (int) (sizes[i] * dimension / 100)) {                    
+                if (original.getWidth() >= (int) (sizes[i] * dimension / 100)) {
                     newImages[i] = resizeImage(original, (int) (sizes[i] * dimension / 100));
                 }
             }
@@ -169,7 +177,7 @@ public class MainApp {
      * 
      * <pre>
      * {@code
-     * originalFile.getName() +"_"
+     * originalFile.getName() + "_"
      * } without the type, followed by the size of the {@link BufferedImage}, ended by {@code
      * "px" + "."
      * } and the {@code
@@ -193,7 +201,7 @@ public class MainApp {
                 // creates a new file in the same folder (parent) with the same name of the old
                 // file (without the ending) + the size + the ending of the exported file
                 File outputFile = new File(originalFile.getParent(),
-                        originalFile.getName().replaceFirst("[.][^.]+$", "") +"_"+ img.getWidth() + "px" + "."
+                        originalFile.getName().replaceFirst("[.][^.]+$", "") + "_" + img.getWidth() + "."
                                 + outputFormat);
                 try {
                     ImageIO.write(img, outputFormat, outputFile);
@@ -209,6 +217,12 @@ public class MainApp {
 
     }
 
+    /**
+     * 
+     * @param filePath
+     * @param sizes
+     * @throws IOException
+     */
     public void codeMode(String filePath, int[] sizes) throws IOException {
         // File f = new File(filePath);
         Document doc = Jsoup.parse(Files.readString(Paths.get(filePath)));
@@ -220,15 +234,72 @@ public class MainApp {
             System.out.println("src attribute is : " + src);
             Path absImgPath = Path.of(filePath).resolve("../").resolve(src).normalize();
             System.out.println(absImgPath.toString());
-            //ALERT: TODO: HINT: dimension 100 needs to be replaced
+            // ALERT: TODO: HINT: dimension 100 needs to be replaced
             StringBuilder sb = new StringBuilder();
-            for(String imgName :imgMode(absImgPath.toFile(), 30, sizes)){
+            int dimension = 10;
+            Path relativeParentFolder = Path.of(img.attributes().get("src")).getParent();
+            String srcName = Path.of(img.attributes().get("src")).getFileName().toString();
+
+            for (String imgName : imgMode(absImgPath.toFile(), dimension, sizes)) {
                 System.out.println(imgName);
-                
+                // find width of image from the string, since its already storesd int here and
+                // everything else would be inefficient
+                int imgWidth = Integer.parseInt(imgName.substring(srcName.length() - 4, imgName.length() - 5));
+                sb.append(relativeParentFolder.toString() + imgName + " " + imgWidth + "w,");
             }
-            img.attr("srcset", filePath)
+            // Delete the last "," thats to much
+            sb.deleteCharAt(sb.length() - 1);
+            img.attr("srcset", sb.toString());
+            // append the size in vw
+            findSizeVW(img, doc, Path.of(filePath));
+        }
+        // save the html
+        Files.writeString(Path.of(filePath), doc.outerHtml());
+    }
+
+    // ONLY works with utf-8 stylesheets
+    private int findSizeVW(Element img, Document doc, Path filePath) {
+        //First we need to load all css
+        Set<Path> StyleSheetPaths = getStyleSheetPath(doc);
+        System.out.println(StyleSheetPaths.toString());
+        StyleSheet css;
+        for (Path cssPath : StyleSheetPaths) {
+            try {
+                css = CSSFactory.parse(filePath.resolve("../").resolve(cssPath).normalize().toUri().toURL(), "utf-8");
+                System.out.println(css.size());
+            } catch (CSSException | IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
 
+        Stack<Element> stack = new Stack<>();
+        Element currentElement = img;
+        stack.push(currentElement);
+
+        while (currentElement.parent() != null) {
+            currentElement = currentElement.parent();
+            stack.push(currentElement);
+        }
+
+        return 0;
+    }
+
+    /**
+     * This method finds all {@code stylesheets} used in the {@code doc} and returns
+     * their {@link Path}.
+     * 
+     * @param doc - the JSoup {@link Document} refering to the {@code HTML}-File
+     * @return {@link Set} of {@link Path} with (relative) paths to the Stylesheets
+     *         used in this Document
+     */
+    private Set<Path> getStyleSheetPath(Document doc) {
+        Set<Path> pathSet = new HashSet<>();
+        Elements cssLinks = doc.select("link[rel=stylesheet]");
+        for (Element cssLink : cssLinks) {
+            pathSet.add(Path.of(cssLink.attributes().get("href")));
+        }
+        return pathSet;
     }
 
 }
