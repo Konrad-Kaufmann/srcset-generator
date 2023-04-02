@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
@@ -21,7 +22,7 @@ import org.jsoup.select.Elements;
 import cz.vutbr.web.css.CSSException;
 import cz.vutbr.web.css.CSSFactory;
 import cz.vutbr.web.css.StyleSheet;
-import cz.vutbr.web.domassign.StyleMap;
+import cz.vutbr.web.domassign.Analyzer;
 
 public class MainApp {
     private int[] sizes = { 1920, 1600, 1366, 1024, 768, 640 };
@@ -36,15 +37,11 @@ public class MainApp {
         Scanner in = new Scanner(System.in);
 
         String path = in.nextLine();
-        while (!in.hasNextInt()) {
-            Thread.sleep(10);
-        }
-        int dimension = in.nextInt();
-        in.close();
+
         // imgMode(path, dimension, sizes);
 
         try {
-            codeMode(path, sizes);
+            codeMode(path, sizes, in);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -99,8 +96,8 @@ public class MainApp {
      * @see #resizeImage(BufferedImage, int)
      */
     private BufferedImage resizeImage(BufferedImage original, int targetW, int targetH) {
-        Image result = original.getScaledInstance(targetH, targetW, Image.SCALE_DEFAULT);
-        BufferedImage output = new BufferedImage(targetH, targetW, BufferedImage.TYPE_INT_RGB);
+        Image result = original.getScaledInstance(targetW, targetH, Image.SCALE_SMOOTH);
+        BufferedImage output = new BufferedImage(targetW, targetH, BufferedImage.TYPE_INT_RGB);
         output.getGraphics().drawImage(result, 0, 0, null);
         return output;
     }
@@ -171,6 +168,29 @@ public class MainApp {
     }
 
     /**
+     * Asks for an dimension via {@link Scanner} of {@code System.in} and then
+     * parses the dimension with the other parameters on to
+     * {@link #imgMode(File, int, int[])}.
+     * 
+     * @param originalFile - file of the original picure
+     * @param sizes        - int[] with the standard-sizes of the pictures in px
+     * 
+     * @return {@link Set} of {@link String} with the filenames of the new images
+     * 
+     * @see #imgMode(File, int, int[])
+     * @see #resizeImage(BufferedImage, int)
+     * @see #saveImages(BufferedImage[], File, String)
+     */
+    public Set<String> imgMode(File originalFile, int[] sizes) {
+        Scanner in = new Scanner(System.in);
+        System.out.print("Please enter image width in percentage of screen size:");
+        in.nextLine();
+        int dimension = in.nextInt();
+        in.close();
+        return imgMode(originalFile, dimension, sizes);
+    }
+
+    /**
      * This function saves an {@code BufferdImage[]} to the same folder as the
      * original file.
      * The naming of the saved {@link File}'s is the following:
@@ -223,7 +243,7 @@ public class MainApp {
      * @param sizes
      * @throws IOException
      */
-    public void codeMode(String filePath, int[] sizes) throws IOException {
+    public void codeMode(String filePath, int[] sizes, Scanner in) throws IOException {
         // File f = new File(filePath);
         Document doc = Jsoup.parse(Files.readString(Paths.get(filePath)));
 
@@ -236,42 +256,56 @@ public class MainApp {
             System.out.println(absImgPath.toString());
             // ALERT: TODO: HINT: dimension 100 needs to be replaced
             StringBuilder sb = new StringBuilder();
-            int dimension = 10;
             Path relativeParentFolder = Path.of(img.attributes().get("src")).getParent();
             String srcName = Path.of(img.attributes().get("src")).getFileName().toString();
+            System.out.println("Please enter image width in percentage of screen size:");
+
+            int dimension = in.nextInt();
 
             for (String imgName : imgMode(absImgPath.toFile(), dimension, sizes)) {
                 System.out.println(imgName);
                 // find width of image from the string, since its already storesd int here and
                 // everything else would be inefficient
                 int imgWidth = Integer.parseInt(imgName.substring(srcName.length() - 4, imgName.length() - 5));
-                sb.append(relativeParentFolder.toString() + imgName + " " + imgWidth + "w,");
+                sb.append(relativeParentFolder.toString() + "/" + imgName + " " + imgWidth + "w,");
             }
-            // Delete the last "," thats to much
-            sb.deleteCharAt(sb.length() - 1);
-            img.attr("srcset", sb.toString());
-            // append the size in vw
-            findSizeVW(img, doc, Path.of(filePath));
+            //sometimes no image is needed, since the resolution is already low enough
+            if (sb.length() > 0) {
+                // Delete the last "," thats to much
+                sb.deleteCharAt(sb.length() - 1);
+                img.attr("srcset", sb.toString());
+                // append the size in vw
+                // findSizeVW(img, doc, Path.of(filePath));
+                img.attr("sizes", dimension + "vw");
+            }
         }
         // save the html
         Files.writeString(Path.of(filePath), doc.outerHtml());
+        in.close();
     }
 
     // ONLY works with utf-8 stylesheets
     private int findSizeVW(Element img, Document doc, Path filePath) {
-        //First we need to load all css
+        // First we need to load all css
         Set<Path> StyleSheetPaths = getStyleSheetPath(doc);
         System.out.println(StyleSheetPaths.toString());
-        StyleSheet css;
+        ArrayList<StyleSheet> css = new ArrayList<>();
+        // creatre the StyleSheets
         for (Path cssPath : StyleSheetPaths) {
             try {
-                css = CSSFactory.parse(filePath.resolve("../").resolve(cssPath).normalize().toUri().toURL(), "utf-8");
+                css.add(CSSFactory.parse(filePath.resolve("../").resolve(cssPath).normalize().toUri().toURL(),
+                        "utf-8"));
                 System.out.println(css.size());
             } catch (CSSException | IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
+        Analyzer analyzer = new Analyzer(css);
+        // StyleMap sM = analyzer.evaluateDOM(doc, new MediaSpecAll(), true);
+        File htmlFile = new File(filePath.toAbsolutePath().toString());
+
+        // analyzer.evaluateDOM(htmlFile,new MediaSpec("screen"), false);
 
         Stack<Element> stack = new Stack<>();
         Element currentElement = img;
