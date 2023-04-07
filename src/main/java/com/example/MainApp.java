@@ -35,7 +35,7 @@ public class MainApp {
     private void start() throws InterruptedException {
 
         Scanner in = new Scanner(System.in);
-
+        System.out.println("Please enter the absolute path to the html-file:");
         String path = in.nextLine();
 
         // imgMode(path, dimension, sizes);
@@ -183,9 +183,15 @@ public class MainApp {
      */
     public Set<String> imgMode(File originalFile, int[] sizes) {
         Scanner in = new Scanner(System.in);
-        System.out.print("Please enter image width in percentage of screen size:");
-        in.nextLine();
-        int dimension = in.nextInt();
+        int dimension = -1;
+        //TODO make this only accept valid input
+        System.out.println1(
+                "Please enter image width in percentage of screen size or \"skip\" if you want to include this particular image:");
+        while (dimension < 1) {
+            in.nextLine();
+
+            int dimension = in.nextInt();
+        }
         in.close();
         return imgMode(originalFile, dimension, sizes);
     }
@@ -269,7 +275,7 @@ public class MainApp {
                 int imgWidth = Integer.parseInt(imgName.substring(srcName.length() - 4, imgName.length() - 5));
                 sb.append(relativeParentFolder.toString() + "/" + imgName + " " + imgWidth + "w,");
             }
-            //sometimes no image is needed, since the resolution is already low enough
+            // sometimes no image is needed, since the resolution is already low enough
             if (sb.length() > 0) {
                 // Delete the last "," thats to much
                 sb.deleteCharAt(sb.length() - 1);
