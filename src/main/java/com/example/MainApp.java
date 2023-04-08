@@ -184,13 +184,20 @@ public class MainApp {
     public Set<String> imgMode(File originalFile, int[] sizes) {
         Scanner in = new Scanner(System.in);
         int dimension = -1;
-        //TODO make this only accept valid input
-        System.out.println1(
-                "Please enter image width in percentage of screen size or \"skip\" if you want to include this particular image:");
-        while (dimension < 1) {
-            in.nextLine();
 
-            int dimension = in.nextInt();
+        System.out.println(
+                "Please enter image width in percentage of screen size (1-100) or \"skip\" if you want to include this particular image:");
+        while (dimension < 1) {
+
+            String inputS = in.nextLine();
+            if (inputS.equalsIgnoreCase("skip")) {
+                in.close();
+                return null;
+            } else if (inputS.matches("[1-9]|[1-9][0-9]|100)")) {
+                dimension = in.nextInt();
+            } else {
+                System.out.println("please enter a valid input");
+            }
         }
         in.close();
         return imgMode(originalFile, dimension, sizes);
@@ -254,6 +261,8 @@ public class MainApp {
         Document doc = Jsoup.parse(Files.readString(Paths.get(filePath)));
 
         Elements images = (Elements) doc.getElementsByTag("img");
+
+        imageIteratorLoop:
         for (Element img : images) {
 
             String src = img.attributes().get("src");
@@ -264,9 +273,23 @@ public class MainApp {
             StringBuilder sb = new StringBuilder();
             Path relativeParentFolder = Path.of(img.attributes().get("src")).getParent();
             String srcName = Path.of(img.attributes().get("src")).getFileName().toString();
-            System.out.println("Please enter image width in percentage of screen size:");
 
-            int dimension = in.nextInt();
+            int dimension = -1;
+
+            System.out.println(
+                    "Please enter image width in percentage of screen size (1-100) or \"skip\" if you want to include this particular image:");
+            while (dimension < 1) {
+
+                String inputS = in.nextLine();
+                if (inputS.equalsIgnoreCase("skip")) {
+                    continue imageIteratorLoop;
+                } else if (inputS.matches("[1-9]|[1-9][0-9]|100)")) {
+                    dimension = in.nextInt();
+                } else {
+                    System.out.println("please enter a valid input");
+                }
+            }
+
 
             for (String imgName : imgMode(absImgPath.toFile(), dimension, sizes)) {
                 System.out.println(imgName);
