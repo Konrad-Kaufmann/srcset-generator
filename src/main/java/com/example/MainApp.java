@@ -35,17 +35,24 @@ public class MainApp {
     private void start() throws InterruptedException {
 
         Scanner in = new Scanner(System.in);
-        System.out.println("Please enter the absolute path to the html-file:");
-        String path = in.nextLine();
 
-        // imgMode(path, dimension, sizes);
+        while (true) {
+            System.out.println("Please enter the absolute path to the html-file or \"exit\":");
 
-        try {
-            codeMode(path, sizes, in);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            String inS = in.nextLine();
+
+            // imgMode(path, dimension, sizes);
+            if (inS.equalsIgnoreCase("exit")) {
+                break;
+            }
+            try {
+                codeMode(inS, sizes, in);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
+        in.close();
 
     }
 
@@ -262,8 +269,7 @@ public class MainApp {
 
         Elements images = (Elements) doc.getElementsByTag("img");
 
-        imageIteratorLoop:
-        for (Element img : images) {
+        imageIteratorLoop: for (Element img : images) {
 
             String src = img.attributes().get("src");
             System.out.println("src attribute is : " + src);
@@ -277,19 +283,20 @@ public class MainApp {
             int dimension = -1;
 
             System.out.println(
-                    "Please enter image width in percentage of screen size (1-100) or \"skip\" if you want to include this particular image:");
-            while (dimension < 1) {
+                    "Please enter image width in percentage of screen size (1-100) or \"skip\" if you want to exclude this particular image:");
+            whileloop: while (dimension < 1) {
 
                 String inputS = in.nextLine();
                 if (inputS.equalsIgnoreCase("skip")) {
                     continue imageIteratorLoop;
-                } else if (inputS.matches("[1-9]|[1-9][0-9]|100)")) {
-                    dimension = in.nextInt();
+                } else if (inputS.matches("[1-9]|[1-9][0-9]|100")) {
+                    dimension = Integer.parseInt(inputS);
+                    System.out.println(dimension);
+                    break whileloop;
                 } else {
                     System.out.println("please enter a valid input");
                 }
             }
-
 
             for (String imgName : imgMode(absImgPath.toFile(), dimension, sizes)) {
                 System.out.println(imgName);
@@ -310,7 +317,6 @@ public class MainApp {
         }
         // save the html
         Files.writeString(Path.of(filePath), doc.outerHtml());
-        in.close();
     }
 
     // ONLY works with utf-8 stylesheets
