@@ -19,10 +19,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import cz.vutbr.web.css.CSSException;
-import cz.vutbr.web.css.CSSFactory;
-import cz.vutbr.web.css.StyleSheet;
-import cz.vutbr.web.domassign.Analyzer;
+
 
 public class MainApp {
     private int[] sizes = { 1920, 1600, 1366, 1024, 768, 640 };
@@ -319,40 +316,7 @@ public class MainApp {
         Files.writeString(Path.of(filePath), doc.outerHtml());
     }
 
-    // ONLY works with utf-8 stylesheets
-    private int findSizeVW(Element img, Document doc, Path filePath) {
-        // First we need to load all css
-        Set<Path> StyleSheetPaths = getStyleSheetPath(doc);
-        System.out.println(StyleSheetPaths.toString());
-        ArrayList<StyleSheet> css = new ArrayList<>();
-        // creatre the StyleSheets
-        for (Path cssPath : StyleSheetPaths) {
-            try {
-                css.add(CSSFactory.parse(filePath.resolve("../").resolve(cssPath).normalize().toUri().toURL(),
-                        "utf-8"));
-                System.out.println(css.size());
-            } catch (CSSException | IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        Analyzer analyzer = new Analyzer(css);
-        // StyleMap sM = analyzer.evaluateDOM(doc, new MediaSpecAll(), true);
-        File htmlFile = new File(filePath.toAbsolutePath().toString());
-
-        // analyzer.evaluateDOM(htmlFile,new MediaSpec("screen"), false);
-
-        Stack<Element> stack = new Stack<>();
-        Element currentElement = img;
-        stack.push(currentElement);
-
-        while (currentElement.parent() != null) {
-            currentElement = currentElement.parent();
-            stack.push(currentElement);
-        }
-
-        return 0;
-    }
+    
 
     /**
      * This method finds all {@code stylesheets} used in the {@code doc} and returns

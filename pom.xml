@@ -53,14 +53,6 @@
       <artifactId>webp-imageio</artifactId>
       <version>0.1.6</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/net.sf.cssbox/jstyleparser -->
-    <!-- This is a temporary solution that might be vulnerable. At time of writing this is used to find the size of an picture-->
-    <dependency>
-      <groupId>net.sf.cssbox</groupId>
-      <artifactId>jstyleparser</artifactId>
-      <version>4.0.0</version>
-    </dependency>
-
   </dependencies>
 
   <build>
