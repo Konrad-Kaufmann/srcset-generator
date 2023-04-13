@@ -231,7 +231,6 @@ public class MainApp {
      * @throws IOException
      */
     private Set<String> saveImages(BufferedImage[] images, File originalFile, String fileType) {
-        System.out.println(originalFile.getParent());
         Set<String> fileNames = new HashSet<>();
         for (BufferedImage img : images) {
             if (img != null) {
@@ -269,13 +268,27 @@ public class MainApp {
         imageIteratorLoop: for (Element img : images) {
 
             String src = img.attributes().get("src");
-            System.out.println("src attribute is : " + src);
+            System.out.println("src attributeof image is : " + src);
             Path absImgPath = Path.of(filePath).resolve("../").resolve(src).normalize();
-            System.out.println(absImgPath.toString());
-            // ALERT: TODO: HINT: dimension 100 needs to be replaced
+            System.out.println("Absolute path is:          " + absImgPath.toString());
+
             StringBuilder sb = new StringBuilder();
             Path relativeParentFolder = Path.of(img.attributes().get("src")).getParent();
             String srcName = Path.of(img.attributes().get("src")).getFileName().toString();
+
+            if(img.attributes().get("srcset").length()>0){
+                System.out.println("An srcset already exists. Do you want to overide it? (Y/N)");
+                while(true){
+                    String response = in.nextLine();
+                    if(response.equalsIgnoreCase("Y")||response.equalsIgnoreCase("yes")){
+                        continue;
+                    }else if(response.equalsIgnoreCase("N")||response.equalsIgnoreCase("no")){
+                        continue imageIteratorLoop;
+                    }else{
+                        System.out.println("Please enter a valid input");
+                    }
+                }
+            }
 
             int dimension = -1;
 
@@ -288,7 +301,6 @@ public class MainApp {
                     continue imageIteratorLoop;
                 } else if (inputS.matches("[1-9]|[1-9][0-9]|100")) {
                     dimension = Integer.parseInt(inputS);
-                    System.out.println(dimension);
                     break whileloop;
                 } else {
                     System.out.println("please enter a valid input");
@@ -310,6 +322,8 @@ public class MainApp {
                 // append the size in vw
                 // findSizeVW(img, doc, Path.of(filePath));
                 img.attr("sizes", dimension + "vw");
+            }else{
+                System.out.println("The input image has to low resolution to be further downscaled.");
             }
         }
         // save the html
