@@ -4,7 +4,7 @@ A srcset is an html attribute that allows the browser to load and deliver an app
 This is achieved by parsing the html and searching for all images, then accesing the image and creating it in the correct sizes.
 ## Limitations/Issues
 - only works if the image has the same size on all screen - sizes
-- currently only works with .webp images
+- currently only exports .webp images
 - no GUI
 - overwrites allready existing srcsets
 ## Input
