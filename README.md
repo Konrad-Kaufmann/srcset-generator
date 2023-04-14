@@ -6,7 +6,6 @@ This is achieved by parsing the html and searching for all images, then accesing
 - only works if the image has the same size on all screen - sizes
 - currently only exports .webp images
 - no GUI
-- overwrites allready existing srcsets
 ## Input
 ## Dependencies
 To parse and write into the .html this tool uses [JSOUP](https://github.com/jhy/jsoup) and [webp-imageio](https://github.com/sejda-pdf/webp-imageio) support to create .webp files.
