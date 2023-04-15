@@ -21,11 +21,11 @@ import org.jsoup.select.Elements;
 
 
 
-public class MainApp {
+public class MainApp_TextMode {
     private int[] sizes = { 1920, 1600, 1366, 1024, 768, 640 };
     private String outputFormat = "webp";
 
-    public MainApp() throws InterruptedException {
+    public MainApp_TextMode() throws InterruptedException {
         start();
     }
 
