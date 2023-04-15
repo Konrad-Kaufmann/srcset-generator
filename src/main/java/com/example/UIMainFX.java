@@ -1,10 +1,11 @@
 package com.example;
 
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
+
+
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -16,13 +17,13 @@ public class UIMainFX extends Application {
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Automatic srcset generator");
         primaryStage.initStyle(StageStyle.DECORATED);
+        Parent root = FXMLLoader.load(getClass().getResource("/Gui.fxml"));
 
 
-        VBox vBox = new VBox(new Label("A JavaFX Label"));
-        Scene scene = new Scene(vBox);
+        Scene scene = new Scene(root);
         primaryStage.setScene(scene);
-        primaryStage.setWidth(600);
-        primaryStage.setHeight(300);
+        //primaryStage.setWidth(600);
+        //primaryStage.setHeight(300);
 
         primaryStage.show();
 
