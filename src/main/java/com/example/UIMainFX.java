@@ -24,6 +24,8 @@ public class UIMainFX extends Application {
     private Stage primaryStage;
     private MainApp mA;
 
+    private File htmFile = null;
+
     public UIMainFX() {
         try {
             mA = new MainApp();
