@@ -7,7 +7,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
@@ -20,11 +19,13 @@ public class UIMainFX extends Application {
     private Slider screensizeSlider;
     @FXML
     private TextField filePathText;
+    @FXML
+    private TextField picturePathText;
 
     private Stage primaryStage;
     private MainApp mA;
 
-    private File htmFile = null;
+    private File htmlFile = null;
 
     public UIMainFX() {
         try {
@@ -62,11 +63,18 @@ public class UIMainFX extends Application {
     }
     public void openFileSearch(){
         FileChooser fileChooser = new FileChooser();
-        File choosenFile = fileChooser.showOpenDialog(primaryStage);
-        setFilePath(choosenFile.getAbsolutePath());
+        fileChooser.setTitle("Choose HTML-File");
+        fileChooser.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter("HTML", "*.html")
+        );
+        htmlFile = fileChooser.showOpenDialog(primaryStage);
+        setFilePath(htmlFile.getAbsolutePath());
     }
     public void setFilePath(String fP){
         filePathText.setText(fP);
+    }
+    public void setPicturePath(String fP){
+        picturePathText.setText(fP);
     }
 
 }
