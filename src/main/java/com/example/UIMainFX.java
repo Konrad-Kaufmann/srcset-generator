@@ -1,5 +1,7 @@
 package com.example;
 
+import java.io.File;
+
 import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -7,6 +9,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -15,6 +18,8 @@ public class UIMainFX extends Application {
 
     @FXML
     private Slider screensizeSlider;
+    @FXML
+    private TextField filePathText;
 
     private Stage primaryStage;
     private MainApp mA;
@@ -55,8 +60,11 @@ public class UIMainFX extends Application {
     }
     public void openFileSearch(){
         FileChooser fileChooser = new FileChooser();
-        fileChooser.showOpenDialog(primaryStage);
+        File choosenFile = fileChooser.showOpenDialog(primaryStage);
+        setFilePath(choosenFile.getAbsolutePath());
     }
-    
+    public void setFilePath(String fP){
+        filePathText.setText(fP);
+    }
 
 }

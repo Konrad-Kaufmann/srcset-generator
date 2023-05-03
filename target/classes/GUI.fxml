@@ -58,7 +58,7 @@
       <HBox prefHeight="33.0" prefWidth="640.0" spacing="5.0">
          <children>
             <Button fx:id="fileSearchBtn" blendMode="SRC_ATOP" mnemonicParsing="false" onAction="#openFileSearch" prefHeight="25.0" prefWidth="24.0" />
-            <TextField accessibleRole="TEXT" focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="25.0" prefWidth="568.0" promptText="HTML - Filepath" HBox.hgrow="ALWAYS" />
+            <TextField fx:id="filePathText" accessibleRole="TEXT" focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="25.0" prefWidth="568.0" promptText="HTML - Filepath" HBox.hgrow="ALWAYS" editable="false" />
          </children>
          <padding>
             <Insets bottom="5.0" left="8.0" right="5.0" top="5.0" />
