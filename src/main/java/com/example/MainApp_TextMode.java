@@ -8,10 +8,10 @@ import java.util.Scanner;
 public class MainApp_TextMode {
     private int[] sizes = { 1920, 1600, 1366, 1024, 768, 640 };
 
-    private MainApp mA;
+    private MainApp_old mA;
 
     public MainApp_TextMode() throws InterruptedException {
-        mA = new MainApp();
+        mA = new MainApp_old();
         start();
     }
 
