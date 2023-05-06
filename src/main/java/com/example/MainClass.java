@@ -9,6 +9,6 @@ public class MainClass {
 
     public static void main(String[] args) throws InterruptedException {
         Application.launch(UIMainFX.class, args);
-        new MainApp_TextMode();
+        //new MainApp_TextMode();
     }
 }

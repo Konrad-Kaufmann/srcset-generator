@@ -29,7 +29,7 @@ public class MainApp_TextMode {
                 break;
             }
             try {
-                mA.codeMode(inS, sizes, in);
+                mA.codeMode(inS, sizes, in, "webp");
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

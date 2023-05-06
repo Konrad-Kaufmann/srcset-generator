@@ -66,8 +66,8 @@
       </HBox>
       <VBox prefHeight="200.0" prefWidth="100.0">
          <children>
-            <TextField fx:id="picturePathText" editable="false" focusTraversable="false" prefHeight="26.0" prefWidth="150.0" promptText="Picture - Filepath" />
-            <ImageView fitHeight="254.0" fitWidth="639.0" pickOnBounds="true" preserveRatio="true" />
+            <TextField fx:id="picturePathText" editable="false" focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="26.0" prefWidth="1000.0" promptText="Picture - Filepath" />
+            <ImageView fx:id="imageView" fitHeight="254.0" fitWidth="639.0" pickOnBounds="true" preserveRatio="true" />
          </children>
          <padding>
             <Insets bottom="5.0" left="8.0" right="8.0" top="5.0" />

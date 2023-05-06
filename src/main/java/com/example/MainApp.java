@@ -3,12 +3,16 @@ package com.example;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.Stack;
 import java.awt.Image;
 import javax.imageio.ImageIO;
 
@@ -17,14 +21,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-
-
 public class MainApp {
 
     public MainApp() throws InterruptedException {
     }
-
-    
 
     /**
      * This method resizes an BufferedImage to the specified dimensions.
@@ -227,18 +227,54 @@ public class MainApp {
     }
 
     /**
+     * This function returns an {@link Stack} of {@link Path}'s. Those Paths are the
+     * absolute paths to all the images contained in the html file.
+     * 
+     * @param filePath the path to the HTML-File as String
+     * @return a {@link Stack} of {@link String}s
+     * @throws IOException
+     */
+    public Deque<Path> imageStack(String filePath) throws IOException {
+        return imageStack(Paths.get(filePath));
+    }
+
+    /**
+     * This function returns an {@link Stack} of {@link Path}'s. Those Paths are the
+     * absolute paths to all the images contained in the html file.
+     * 
+     * @param filePath the path to the HTML-File as String
+     * @return a {@link Stack} of {@link String}s
+     * @throws IOException
+     */
+    public Deque<Path> imageStack(Path filePath) throws IOException {
+        Deque<Path> returnStack = new ArrayDeque<Path>();
+
+        Document doc = Jsoup.parse(Files.readString(filePath));
+        Elements images = (Elements) doc.getElementsByTag("img");
+        for (Element img : images) {
+            String src = img.attributes().get("src");
+
+            Path absImgPath = filePath.resolve("../").resolve(src).normalize();
+            returnStack.push(absImgPath);
+        }
+
+        return returnStack;
+    }
+
+    /**
      * 
      * @param filePath
      * @param sizes
      * @throws IOException
      */
-    public void codeMode(String filePath, int[] sizes, Scanner in, String outputFormat) throws IOException {
+    public void codeMode(String filePath, int[] sizes,  String outputFormat) throws IOException {
         // File f = new File(filePath);
         Document doc = Jsoup.parse(Files.readString(Paths.get(filePath)));
 
         Elements images = (Elements) doc.getElementsByTag("img");
 
-        imageIteratorLoop: for (Element img : images) {
+        imageIteratorLoop:
+        for (Element img : images) {
 
             String src = img.attributes().get("src");
             System.out.println("src attributeof image is : " + src);
@@ -249,36 +285,12 @@ public class MainApp {
             Path relativeParentFolder = Path.of(img.attributes().get("src")).getParent();
             String srcName = Path.of(img.attributes().get("src")).getFileName().toString();
 
-            if(img.attributes().get("srcset").length()>0){
-                System.out.println("An srcset already exists. Do you want to overide it? (Y/N)");
-                while(true){
-                    String response = in.nextLine();
-                    if(response.equalsIgnoreCase("Y")||response.equalsIgnoreCase("yes")){
-                        continue;
-                    }else if(response.equalsIgnoreCase("N")||response.equalsIgnoreCase("no")){
-                        continue imageIteratorLoop;
-                    }else{
-                        System.out.println("Please enter a valid input");
-                    }
-                }
-            }
-
             int dimension = -1;
 
             System.out.println(
                     "Please enter image width in percentage of screen size (1-100) or \"skip\" if you want to exclude this particular image:");
-            whileloop: while (dimension < 1) {
-
-                String inputS = in.nextLine();
-                if (inputS.equalsIgnoreCase("skip")) {
-                    continue imageIteratorLoop;
-                } else if (inputS.matches("[1-9]|[1-9][0-9]|100")) {
-                    dimension = Integer.parseInt(inputS);
-                    break whileloop;
-                } else {
-                    System.out.println("please enter a valid input");
-                }
-            }
+            
+            //int nextCache
 
             for (String imgName : imgMode(absImgPath.toFile(), dimension, sizes, outputFormat)) {
                 System.out.println(imgName);
@@ -302,8 +314,6 @@ public class MainApp {
         // save the html
         Files.writeString(Path.of(filePath), doc.outerHtml());
     }
-
-    
 
     /**
      * This method finds all {@code stylesheets} used in the {@code doc} and returns
